@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Add Polling Unit Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 850px;
+            margin: 40px auto;
+            padding: 0 20px;
+            line-height: 1.6;
+        }
+
+        label {
+            display: block;
+            margin-top: 14px;
+        }
+
+        input, select, button {
+            padding: 10px;
+            box-sizing: border-box;
+            max-width: 100%;
+        }
+
+        input, select {
+            width: 100%;
+        }
+
+        button {
+            margin-top: 16px;
+            cursor: pointer;
+        }
+
+        .errors {
+            background: #fff0f0;
+            color: #8b0000;
+            padding: 16px 30px;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/">Polling unit results</a> |
+        <a href="/lga-results">LGA totals</a> |
+        <a href="/new-results">Add results</a>
+    </nav>
+
+    <h1>Add a New Polling Unit and Results</h1>
+    <p>Bincom assessment — supplied dummy election data.</p>
+
+    {% if errors %}
+        <ul class="errors" role="alert">
+            {% for error in errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <form method="get" action="/new-results">
+        <label for="lga">First, choose an LGA:</label>
+
+        <select id="lga" name="lga" required>
+            <option value="">Choose an LGA</option>
+
+            {% for lga in lgas %}
+                <option
+                    value="{{ lga.lga_id }}"
+                    {% if lga.lga_id == selected_lga_id %}selected{% endif %}
+                >
+                    {{ lga.lga_name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Load wards</button>
+    </form>
+
+    {% if wards %}
+        <form method="post" action="/new-results">
+            <input type="hidden" name="lga" value="{{ selected_lga_id }}">
+            <input type="hidden" name="form_token" value="{{ form_token }}">
+
+            <label for="ward">Ward:</label>
+            <select id="ward" name="ward" required>
+                <option value="">Choose a ward</option>
+
+                {% for ward in wards %}
+                    <option
+                        value="{{ ward.uniqueid }}"
+                        {% if request.form.get("ward") == ward.uniqueid|string %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ ward.ward_name }} — ID {{ ward.uniqueid }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <label for="polling_unit_name">New polling unit name:</label>
+            <input
+                id="polling_unit_name"
+                name="polling_unit_name"
+                maxlength="50"
+                value="{{ request.form.get('polling_unit_name', '') }}"
+                required
+            >
+
+            <label for="entered_by">Your name:</label>
+            <input
+                id="entered_by"
+                name="entered_by"
+                maxlength="50"
+                value="{{ request.form.get('entered_by', '') }}"
+                required
+            >
+
+            <h2>Party scores</h2>
+            <p>Enter a score for every party. Zero is accepted.</p>
+
+            {% for party in parties %}
+                <label for="score_{{ party.partyid }}">
+                    {{ party.partyname }}
+                </label>
+                <input
+                    type="number"
+                    id="score_{{ party.partyid }}"
+                    name="score_{{ party.partyid }}"
+                    min="0"
+                    max="2147483647"
+                    step="1"
+                    value="{{ request.form.get('score_' ~ party.partyid, '') }}"
+                    required
+                >
+            {% endfor %}
+
+            <button type="submit">Save polling unit and all results</button>
+        </form>
+    {% elif selected_lga_id is not none %}
+        <p>No wards are available for this selection. Choose another LGA.</p>
+    {% endif %}
+</body>
+</html>

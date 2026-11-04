@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Polling Unit Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 850px;
+            margin: 40px auto;
+            padding: 0 20px;
+            line-height: 1.6;
+        }
+
+        select, button {
+            padding: 10px;
+            max-width: 100%;
+            margin: 8px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background: #eee;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/">Polling unit results</a> |
+        <a href="/lga-results">LGA totals</a> |
+        <a href="/new-results">Add results</a>
+    </nav>
+    <h1>Polling Unit Results</h1>
+    <p>Bincom assessment — supplied dummy election data.</p>
+
+    <form method="get" action="/">
+        <label for="polling_unit">Select a polling unit:</label>
+        <br>
+
+        <select id="polling_unit" name="polling_unit" required>
+            <option value="">Choose a polling unit</option>
+
+            {% for unit in polling_units %}
+                <option
+                    value="{{ unit.uniqueid }}"
+                    {% if unit.uniqueid == selected_id %}selected{% endif %}
+                >
+                    {{ unit.polling_unit_name or "Unnamed polling unit" }}
+                    — ID {{ unit.uniqueid }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">View results</button>
+    </form>
+
+    {% if selected_unit %}
+        <h2>
+            {{ selected_unit.polling_unit_name or "Unnamed polling unit" }}
+        </h2>
+
+        {% if results %}
+            <table>
+                <thead>
+                    <tr>
+                        <th scope="col">Party</th>
+                        <th scope="col">Votes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                        <tr>
+                            <td>{{ result.party_abbreviation }}</td>
+                            <td>{{ result.party_score }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No results have been recorded for this polling unit.</p>
+        {% endif %}
+    {% elif selected_id is not none %}
+        <p>The selected polling unit does not exist.</p>
+    {% endif %}
+</body>
+</html>

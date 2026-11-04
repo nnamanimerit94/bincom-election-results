@@ -1,0 +1,16 @@
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: bincom
+      MYSQL_USER: bincom_user
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "127.0.0.1:3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./bincom_test.sql:/docker-entrypoint-initdb.d/bincom_test.sql:ro
+      - ./schema_update.sql:/docker-entrypoint-initdb.d/zz_schema_update.sql:ro
+volumes:
+  mysql_data:

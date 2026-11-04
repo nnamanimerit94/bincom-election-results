@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>LGA Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 850px;
+            margin: 40px auto;
+            padding: 0 20px;
+            line-height: 1.6;
+        }
+
+        select, button {
+            padding: 10px;
+            max-width: 100%;
+            margin: 8px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background: #eee;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/">Polling unit results</a> |
+        <a href="/lga-results">LGA totals</a> |
+        <a href="/new-results">Add results</a>
+    </nav>
+
+    <h1>Local Government Results</h1>
+    <p>
+        Totals calculated from recorded polling-unit results
+        in the selected Delta State LGA.
+    </p>
+
+    <form method="get" action="/lga-results">
+        <label for="lga">Select a local government area:</label>
+        <br>
+
+        <select id="lga" name="lga" required>
+            <option value="">Choose an LGA</option>
+
+            {% for lga in lgas %}
+                <option
+                    value="{{ lga.lga_id }}"
+                    {% if lga.lga_id == selected_lga_id %}selected{% endif %}
+                >
+                    {{ lga.lga_name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">View totals</button>
+    </form>
+
+    {% if selected_lga %}
+        <h2>{{ selected_lga.lga_name }}</h2>
+
+        {% if results %}
+            <table>
+                <thead>
+                    <tr>
+                        <th scope="col">Party</th>
+                        <th scope="col">Total votes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                        <tr>
+                            <td>{{ result.party_abbreviation }}</td>
+                            <td>{{ result.total_votes }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <p>
+                These totals include recorded results only.
+                Missing results are not treated as confirmed zero votes.
+            </p>
+        {% else %}
+            <p>No polling-unit results are recorded for this LGA.</p>
+        {% endif %}
+    {% elif selected_lga_id is not none %}
+        <p>The selected LGA does not exist in the Delta State list.</p>
+    {% endif %}
+</body>
+</html>
